@@ -46,6 +46,9 @@ def find_clients(metadata):
         if pk is not None:
             server[username]['ssh_pubkeys'] += [pk, ]
 
+        server[username].setdefault('clients', [])
+        server[username]['clients'] += [restic_node.name, ]
+
     return {
         'restic': {
             'server': server,
