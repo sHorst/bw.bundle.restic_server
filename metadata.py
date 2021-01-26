@@ -6,7 +6,7 @@ def add_users(metadata):
 
     users = {}
     for username, user_attrs in metadata.get('restic/server', {}).items():
-        users[f'{username}backup'] = {
+        users[username] = {
             'sudo': False,
             'rssh': {
                 'umask': '011',
@@ -20,8 +20,34 @@ def add_users(metadata):
         }
 
         if 'ssh_pubkeys' in user_attrs:
-            users[f'{username}backup']['ssh_pubkeys'] = user_attrs['ssh_pubkeys']
+            users[username]['ssh_pubkeys'] = user_attrs['ssh_pubkeys']
 
     return {
         'users': users,
+    }
+
+
+@metadata_reactor
+def find_clients(metadata):
+    server = {}
+    for restic_node in sorted(repo.nodes, key=lambda x: x.name):
+        if not restic_node.has_bundle('restic'):
+            continue
+
+        if restic_node.name == node.name:
+            continue
+
+        username = restic_node.metadata.get(f'restic/backup_hosts/{node.name}/username', None)
+        if username is None:
+            continue
+
+        server.setdefault(username, {}).setdefault('ssh_pubkeys', [])
+        pk = restic_node.metadata.get(f'restic/backup_hosts/{node.name}/public_key', None)
+        if pk is not None:
+            server[username]['ssh_pubkeys'] += [pk, ]
+
+    return {
+        'restic': {
+            'server': server,
+        },
     }
