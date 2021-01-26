@@ -1,1 +1,1 @@
-# bw.bundle.restick_server
+# bw.bundle.restic_server
