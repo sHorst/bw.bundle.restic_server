@@ -22,19 +22,25 @@ if node.has_bundle('check_mk_agent'):
     ]
 
     for user_name, user in node.metadata.get('restic', {}).get('server', {}).items():
+        home = user.get('home', f'/home/{user_name}')
+        piggy_file = f'{home}/piggy_restic'
+
+        cron += [
+            f'echo "" > {piggy_file}'
+        ]
         for restic_nodename in user.get('clients', []):
             restic_node = repo.get_node(restic_nodename)
             hostname = restic_node.hostname
 
-            home = user.get('home', f'/home/{user_name}')
-
             cron += [
-                f'echo "<<<<{hostname}>>>>" > /var/lib/check_mk_agent/spool/piggy_{hostname}',
-                f'echo "<<<local>>>" >> /var/lib/check_mk_agent/spool/piggy_{hostname}',
-                f'/opt/restic/restic_last_change.sh {home}/{restic_nodename} >> /var/lib/check_mk_agent/spool/piggy_{hostname}',
-                f'echo "<<<<>>>>" >> /var/lib/check_mk_agent/spool/piggy_{hostname}',
+                f'echo "<<<<{hostname}>>>>" >> {piggy_file}',
+                f'echo "<<<local>>>" >> {piggy_file}',
+                f'/opt/restic/restic_last_change.sh {home}/{restic_nodename} >> {piggy_file}',
             ]
 
+        cron += [
+            f'echo "<<<<>>>>" >> {piggy_file}',
+        ]
     files['/etc/cron.hourly/restic_last_backup'] = {
         'content': '\n'.join(cron) + '\n',
         'mode': '0755',
