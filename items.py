@@ -18,7 +18,7 @@ if node.has_bundle('check_mk_agent'):
     }
 
     cron = [
-        '# !/usr/bin/env bash',
+        '#!/usr/bin/env bash',
     ]
 
     for user_name, user in node.metadata.get('restic', {}).get('server', {}).items():
