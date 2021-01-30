@@ -15,6 +15,10 @@ files = {}
 if node.has_bundle('check_mk_agent'):
     files['/opt/restic/restic_last_change.sh'] = {
         'mode': '0755',
+        'content_type': 'jinja2',
+        'context': {
+            'server_name': node.hostname,
+        }
     }
 
     cron = [
