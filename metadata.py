@@ -8,15 +8,15 @@ def add_users(metadata):
     for username, user_attrs in metadata.get('restic/server', {}).items():
         users[username] = {
             'sudo': False,
-            'rssh': {
-                'umask': '011',
-                'accessbits': '100110',
-                'path': '',
-            },  # add only RSYNC, SFTP and SCP here
+            # 'rush': {
+            #     'umask': '011',
+            #     'accessbits': '100110',
+            #     'path': '',
+            # },  # add only RSYNC, SFTP and SCP here
             'home': user_attrs.get('home', "/home/{}".format(username)),
             'full_name': f'Backup user for {username}',
             'password_hash': user_attrs.get('password_hash', '*'),
-            'shell': user_attrs.get('shell', '/usr/bin/rssh'),
+            'shell': user_attrs.get('shell', '/usr/sbin/rush'),
         }
 
         if 'ssh_pubkeys' in user_attrs:
