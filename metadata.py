@@ -1,3 +1,5 @@
+global metadata_reactor, node, DoNotRunAgain, repo
+
 
 @metadata_reactor
 def add_users(metadata):
@@ -17,6 +19,7 @@ def add_users(metadata):
             'full_name': f'Backup user for {username}',
             'password_hash': user_attrs.get('password_hash', '*'),
             'shell': user_attrs.get('shell', '/usr/sbin/rush'),
+            'exclude_backup': user_attrs.get('exclude_backup', True),
         }
 
         if 'ssh_pubkeys' in user_attrs:
