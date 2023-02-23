@@ -1,4 +1,4 @@
-
+global node, BundleException, repo
 
 # restic Server consists basicaly of a rsync Server
 if not node.has_bundle('openssh'):
@@ -25,13 +25,26 @@ if node.has_bundle('check_mk_agent'):
         '#!/usr/bin/env bash',
     ]
 
+    reset_piggy_files = []
+
     for user_name, user in node.metadata.get('restic', {}).get('server', {}).items():
         home = user.get('home', f'/home/{user_name}')
-        piggy_file = f'{home}/piggy_restic'
+        monitor_home = node.metadata.get('restic/server/' + user.get('monitoring_user', user_name), {}).get('home')
+        piggy_file = f'{monitor_home}/piggy_restic'
+
+        if not user.get('clients', None):
+            continue
 
         cron += [
-            f'echo "" > {piggy_file}'
+            f'##### {user_name} #####',
         ]
+
+        if piggy_file not in reset_piggy_files:
+            cron += [
+                f'echo "" > {piggy_file}',
+            ]
+            reset_piggy_files += [piggy_file, ]
+
         for restic_nodename in user.get('clients', []):
             restic_node = repo.get_node(restic_nodename)
             hostname = restic_node.hostname
