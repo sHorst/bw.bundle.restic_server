@@ -3,8 +3,8 @@
 folder=$1
 server={{server_name}}
 
-last_file=$(ls -tr $folder/index | tail -n 1)
-ftime=$(stat -c %Y $folder/index/$last_file)
+last_file=$(ls -tr $folder/snapshots | tail -n 1)
+ftime=$(stat -c %Y $folder/snapshots/$last_file)
 ctime=$(date +%s)
 diff=$(( ctime - ftime ))
 diff_days=$(( diff / 86400 ))
