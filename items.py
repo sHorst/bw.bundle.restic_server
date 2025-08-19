@@ -41,7 +41,7 @@ if node.has_bundle('check_mk_agent'):
 
         if piggy_file not in reset_piggy_files:
             cron += [
-                f'echo "" > {piggy_file}',
+                f'echo "" > {piggy_file}_tmp',
             ]
             reset_piggy_files += [piggy_file, ]
 
@@ -50,15 +50,18 @@ if node.has_bundle('check_mk_agent'):
             hostname = restic_node.hostname
 
             cron += [
-                f'echo "<<<<{hostname}>>>>" >> {piggy_file}',
-                f'echo "<<<local>>>" >> {piggy_file}',
-                f'/opt/restic/restic_last_change.sh {home}/{restic_nodename} >> {piggy_file}',
+                f'echo "<<<<{hostname}>>>>" >> {piggy_file}_tmp',
+                f'echo "<<<local>>>" >> {piggy_file}_tmp',
+                f'/opt/restic/restic_last_change.sh {home}/{restic_nodename} >> {piggy_file}_tmp',
             ]
 
         cron += [
-            f'echo "<<<<>>>>" >> {piggy_file}',
+            f'echo "<<<<>>>>" >> {piggy_file}_tmp',
+            '',
+            f'mv {piggy_file}_tmp {piggy_file}',
         ]
     files['/etc/cron.hourly/restic_last_backup'] = {
         'content': '\n'.join(cron) + '\n',
         'mode': '0755',
     }
+
